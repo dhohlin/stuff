@@ -21,7 +21,7 @@ namespace Stuff.Tests
         public void SameValuesAfterMultipleEnumerations()
         {
             var generator = getGuidsGenerator();
-            var cachingGenerator = CachingGenerator<Guid>.CreateCachingGenerator(generator);
+            var cachingGenerator = CachingGenerator.Create(generator);
 
             var firstEnumeration = cachingGenerator.ToArray();
             var secongEnumeration = cachingGenerator.ToArray();
@@ -31,7 +31,7 @@ namespace Stuff.Tests
         [Test]
         public void NewEnumeratorAtEachRequest()
         {
-            var cachingGenerator = CachingGenerator<string>.CreateCachingGenerator(new List<string>() { "qwe", "wer", "ert" });
+            var cachingGenerator = CachingGenerator.Create(new List<string>() { "qwe", "wer", "ert" });
             var enumerator1 = cachingGenerator.GetEnumerator();
             var enumerator2 = cachingGenerator.GetEnumerator();
             Assert.AreNotSame(enumerator1, enumerator2);
@@ -41,7 +41,7 @@ namespace Stuff.Tests
         public void SimultaneousIteration()
         {
             var generator = getGuidsGenerator();
-            var cachingGenerator = CachingGenerator<Guid>.CreateCachingGenerator(generator);
+            var cachingGenerator = CachingGenerator.Create(generator);
 
             var firstEnumerator = cachingGenerator.GetEnumerator();
             var secondEnumerator = cachingGenerator.GetEnumerator();
