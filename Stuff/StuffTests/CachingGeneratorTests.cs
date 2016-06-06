@@ -66,6 +66,55 @@ namespace Stuff.Tests
             lst2.Add(secondEnumerator.Current);
 
             CollectionAssert.AreEqual(lst1, lst2);
+
+            assertIsValidCachingState(3, CachingGenerator.GetCachingGeneratorState(cachingGenerator));
+        }
+
+        [Test]
+        public void TestCacheStates()
+        {
+            var generator = getGuidsGenerator();
+            assertIsNotACachingState(CachingGenerator.GetCachingGeneratorState(generator));
+
+            var cachingGenerator = CachingGenerator.Create(generator);
+            var getCachingState = (Func<CachingGenerator.State>)(() => CachingGenerator.GetCachingGeneratorState(cachingGenerator));
+            assertIsEmptyCachingState(getCachingState());
+
+            var firstEnumerator = cachingGenerator.GetEnumerator();
+            var secondEnumerator = cachingGenerator.GetEnumerator();
+
+            firstEnumerator.MoveNext();
+            assertIsValidCachingState(1, getCachingState());
+
+            secondEnumerator.MoveNext();
+            assertIsValidCachingState(1, getCachingState());
+
+            firstEnumerator.MoveNext();
+            assertIsValidCachingState(2, getCachingState());
+            firstEnumerator.Reset();
+            assertIsValidCachingState(2, getCachingState());
+        }
+
+        private void assertIsValidCachingState(int cacheSize, CachingGenerator.State state)
+        {
+            assertCacheState(true, true, cacheSize, state);
+        }
+
+        private void assertIsEmptyCachingState(CachingGenerator.State state)
+        {
+            assertCacheState(true, false, 0, state);
+        }
+
+        private void assertIsNotACachingState(CachingGenerator.State state)
+        {
+            assertCacheState(false, false, 0, state);
+        }
+
+        private void assertCacheState(bool isCachingGenerator, bool isEnumeratorCreated, int cacheSize, CachingGenerator.State state)
+        {
+            Assert.AreEqual(isCachingGenerator, state.IsCachingGenerator);
+            Assert.AreEqual(isEnumeratorCreated, state.EnumeratorCreated);
+            Assert.AreEqual(cacheSize, state.CacheSize);
         }
     }
 }

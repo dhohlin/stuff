@@ -15,12 +15,31 @@ namespace Stuff
             return new CachingGeneratorImpl<T>(decoratee);
         }
 
+        public struct State
+        {
+            public bool IsCachingGenerator { get; internal set; }
+            public bool EnumeratorCreated { get; internal set; }
+            public int CacheSize { get; internal set; }
+        }
+
+        public static State GetCachingGeneratorState<T>(IEnumerable<T> enumerable)
+        {
+            var cachingGenerator = enumerable as CachingGeneratorImpl<T>;
+            return new State()
+            {
+                IsCachingGenerator = cachingGenerator != null,
+                EnumeratorCreated = cachingGenerator?.origEnumerator != null,
+                CacheSize = cachingGenerator?.cache.Keys.Count ?? 0
+            };
+        }
+
+
         private class CachingGeneratorImpl<T> : IEnumerable<T>
         {
             private IEnumerable<T> origGenerator;
-            private IEnumerator<T> origEnumerator;
+            internal IEnumerator<T> origEnumerator;
 
-            private readonly ConcurrentDictionary<int, T> cache = new ConcurrentDictionary<int, T>();
+            internal readonly ConcurrentDictionary<int, T> cache = new ConcurrentDictionary<int, T>();
 
             internal CachingGeneratorImpl(IEnumerable<T> decoratee)
             {
@@ -59,11 +78,6 @@ namespace Stuff
                 if (!cache.TryGetValue(index, out result))
                     throw new InvalidOperationException("Cache slot is empty");
                 return result;
-            }
-
-            internal bool check()
-            {
-                return true;
             }
 
             private class CachingEnumerator : IEnumerator<T>
