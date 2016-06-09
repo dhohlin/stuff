@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using Stuff;
 
-namespace Stuff.Tests
+namespace StuffTests
 {
     [TestFixture]
     public class CachingGeneratorTests
@@ -14,7 +15,6 @@ namespace Stuff.Tests
             {
                 yield return Guid.NewGuid();
             }
-            yield break;
         }
 
         [Test]
@@ -31,7 +31,7 @@ namespace Stuff.Tests
         [Test]
         public void NewEnumeratorAtEachRequest()
         {
-            var cachingGenerator = CachingGenerator.Create(new List<string>() { "qwe", "wer", "ert" });
+            var cachingGenerator = CachingGenerator.Create(new List<string> { "qwe", "wer", "ert" });
             var enumerator1 = cachingGenerator.GetEnumerator();
             var enumerator2 = cachingGenerator.GetEnumerator();
             Assert.AreNotSame(enumerator1, enumerator2);

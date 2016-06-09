@@ -6,13 +6,24 @@ using System.Collections.Generic;
 namespace Stuff
 {
     /// <summary>
-    /// Caching decorator for IEnumerable generators 
+    ///     Caching decorator for IEnumerable generators
     /// </summary>
     public static class CachingGenerator
     {
         public static IEnumerable<T> Create<T>(IEnumerable<T> decoratee)
         {
             return new CachingGeneratorImpl<T>(decoratee);
+        }
+
+        public static State GetCachingGeneratorState<T>(IEnumerable<T> enumerable)
+        {
+            var cachingGenerator = enumerable as CachingGeneratorImpl<T>;
+            return new State
+            {
+                IsCachingGenerator = cachingGenerator != null,
+                EnumeratorCreated = cachingGenerator?.origEnumerator != null,
+                CacheSize = cachingGenerator?.cache.Keys.Count ?? 0
+            };
         }
 
         public struct State
@@ -22,24 +33,12 @@ namespace Stuff
             public int CacheSize { get; internal set; }
         }
 
-        public static State GetCachingGeneratorState<T>(IEnumerable<T> enumerable)
-        {
-            var cachingGenerator = enumerable as CachingGeneratorImpl<T>;
-            return new State()
-            {
-                IsCachingGenerator = cachingGenerator != null,
-                EnumeratorCreated = cachingGenerator?.origEnumerator != null,
-                CacheSize = cachingGenerator?.cache.Keys.Count ?? 0
-            };
-        }
-
 
         private class CachingGeneratorImpl<T> : IEnumerable<T>
         {
-            private IEnumerable<T> origGenerator;
-            internal IEnumerator<T> origEnumerator;
-
             internal readonly ConcurrentDictionary<int, T> cache = new ConcurrentDictionary<int, T>();
+            private readonly IEnumerable<T> origGenerator;
+            internal IEnumerator<T> origEnumerator;
 
             internal CachingGeneratorImpl(IEnumerable<T> decoratee)
             {
@@ -91,23 +90,13 @@ namespace Stuff
                     index = -1;
                 }
 
-                public T Current
-                {
-                    get
-                    {
-                        return parent.getValueAtIndex(index);
-                    }
-                }
+                public T Current => parent.getValueAtIndex(index);
 
-                object IEnumerator.Current
-                {
-                    get
-                    {
-                        return Current;
-                    }
-                }
+                object IEnumerator.Current => Current;
 
-                public void Dispose() { }
+                public void Dispose()
+                {
+                }
 
                 public bool MoveNext()
                 {
@@ -122,5 +111,4 @@ namespace Stuff
             }
         }
     }
-
 }
