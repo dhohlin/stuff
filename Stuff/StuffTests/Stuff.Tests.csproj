@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="CachingGeneratorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RunOnceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
