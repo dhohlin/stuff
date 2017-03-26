@@ -13,38 +13,7 @@ namespace StuffTests
 {
     [TestFixture]
     class RunOnceTests
-    {
-        [Test]
-        public void TestRunonceInstance()
-        {
-            var runOnce = new RunOnce();
-
-            int i = 0;
-            Action action = () => { i++; };
-
-            runOnce.Run(action);
-            runOnce.Run(action);
-            runOnce.Run(action);
-            runOnce.Run(action);
-            runOnce.Run(action);
-            Assert.AreEqual(1, i);
-        }
-
-        [Test]
-        public void TestWrapperWithSimpleAction()
-        {
-            int i = 0;
-            Action action = () => { i++; };
-
-            var runOnce = new RunOnceWrapper(action);
-            var act = runOnce.GetAction;
-
-            act();
-            act();
-            act();
-            Assert.AreEqual(1, i);
-        }
-
+    {   
         [Test]
         public void TestDecoration_ParameterlessAction()
         {
@@ -207,7 +176,7 @@ namespace StuffTests
             Assert.AreEqual(true, isEven(2));
             Assert.AreEqual(false, isEven(3));
 
-            var decoreated = (new RunOnceHelper()).WrapDummy(isEven);
+            var decoreated = (new RunOnceDelegateDecorator()).DecorateDummy(isEven);
             Assert.AreEqual(true, decoreated(2));
             Assert.AreEqual(false, decoreated(3));
         }
@@ -230,7 +199,9 @@ namespace StuffTests
             Assert.AreEqual(3, i);
 
             i = 0;
-            var decorated = (new RunOnceHelper()).WrapRunOnceUnsafe(fun);
+            var decorated = (new RunOnceDelegateDecorator()).DecorateRunOnceUnsafe(fun);
+            Assert.AreNotEqual(fun, decorated);
+
             Assert.AreEqual(true, decorated(3));
             Assert.AreEqual(1, i);
             Assert.AreEqual(false, decorated(3));
