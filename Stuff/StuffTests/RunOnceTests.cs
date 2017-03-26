@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using Stuff;
@@ -66,9 +67,14 @@ namespace StuffTests
         [Test]
         public void ExamineGenericFunctions()
         {
-            var func2Type = typeof(Func<int, string, decimal, double, bool>);
+            Func<int, bool> isEven = i => i % 2 == 0;
 
-            
+            Assert.AreEqual(true, isEven(2));
+            Assert.AreEqual(false, isEven(3));
+
+            var decoreated = (new RunOnceHelper()).Wrap(isEven);
+            Assert.AreEqual(true, decoreated(2));
+            Assert.AreEqual(false, decoreated(3));
         }
     }
 }

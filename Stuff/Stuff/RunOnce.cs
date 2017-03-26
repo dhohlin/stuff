@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -122,6 +123,26 @@ namespace Stuff
                 }
             };
         }
+
+        public T Wrap<T>(T del) where T : class
+        {
+            var delegateType = typeof(T);
+            if (!delegateType.IsSubclassOf(typeof(Delegate)))
+                throw new ArgumentException("Parameter must be of delegate type");
+
+            var invokeMethodInfo = delegateType.GetMethod("Invoke");            
+            var parametersInfo = invokeMethodInfo.GetParameters();
+
+            var parameters = parametersInfo.Select(pi => Expression.Parameter(pi.ParameterType)).ToArray();
+            var delegateInstance = del as Delegate;
+            var ce = Expression.Call(
+                Expression.Constant(delegateInstance.Target),
+                delegateInstance.Method,
+                parameters);
+            var lambda = Expression.Lambda(ce, parameters);
+            var d = lambda.Compile() as T;
+            return d;
+        }
     }
 
     public static class Ext
@@ -131,7 +152,11 @@ namespace Stuff
             var t = func.GetType();
 
             var helper = new RunOnceHelper();
-            return helper.WrapFunc(func);            
+            return helper.WrapFunc(func);
         }
+
+        public static Action AsRunOnce(this Action action) => (new RunOnceHelper()).Wrap(action);
+        public static Action<T> AsRunOnce<T>(this Action<T> action) => (new RunOnceHelper()).Wrap(action);
+        public static Action<T1, T2> AsRunOnce<T1, T2>(this Action<T1, T2> action) => (new RunOnceHelper()).Wrap(action);
     }
 }
