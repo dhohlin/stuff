@@ -249,14 +249,16 @@ namespace StuffTests
 
             var evt = new ManualResetEvent(false);
 
-            for (int j = 0; j < 500; j++)
-            {
-                Task.Factory.StartNew(() =>
+            var tasks = Enumerable.Range(0, 5000)
+                .Select(_ => Task.Factory.StartNew(() =>
                 {
                     evt.WaitOne();
                     runOnce();
-                });
-            }
+                }))
+                .ToArray();
+
+            evt.Set();
+            Task.WaitAll(tasks);
             Assert.AreEqual(1, i);
         }
     }
