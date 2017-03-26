@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Stuff
 {
     public class RunOnceDelegateDecorator
     {
-        private volatile bool _runBefore = false;
         private readonly AutoResetEvent _syncObj = new AutoResetEvent(true);
+        private volatile bool _runBefore = false;
 
         /// <summary> Simple decoration of given delegate. Does not introduce any additional behavior </summary>
         /// <typeparam name="T"> Delegate type</typeparam>
@@ -98,15 +95,13 @@ namespace Stuff
             var defaultExpression = Expression.Default(returnType);
             var runBeforeFieldExpression = Expression.Field(Expression.Constant(this), "_runBefore");
 
-            var a = (Func<bool>)_syncObj.WaitOne;
-
             var conditionExpression = Expression.Condition(
                 Expression.IsTrue(runBeforeFieldExpression),
                 defaultExpression,
                 Expression.Block(
                     Expression.Call(
                         Expression.Constant(_syncObj),
-                        ((Func<bool>)_syncObj.WaitOne).Method),
+                        ((Func<bool>) _syncObj.WaitOne).Method),
                     Expression.TryFinally(
                         Expression.Condition(
                             Expression.IsTrue(runBeforeFieldExpression),
@@ -117,11 +112,11 @@ namespace Stuff
                             returnType),
                         Expression.Call(
                             Expression.Constant(_syncObj),
-                            ((Func<bool>)_syncObj.Set).Method))),
+                            ((Func<bool>) _syncObj.Set).Method))),
                 returnType);
 
             var lambda = Expression.Lambda(conditionExpression, parameters);
-            return  lambda.Compile() as T;            
+            return lambda.Compile() as T;
         }
     }
 }
