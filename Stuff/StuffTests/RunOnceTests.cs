@@ -65,16 +65,43 @@ namespace StuffTests
         }
 
         [Test]
-        public void ExamineGenericFunctions()
+        public void TestDummyWrapping()
         {
             Func<int, bool> isEven = i => i % 2 == 0;
 
             Assert.AreEqual(true, isEven(2));
             Assert.AreEqual(false, isEven(3));
 
-            var decoreated = (new RunOnceHelper()).Wrap(isEven);
+            var decoreated = (new RunOnceHelper()).WrapDummy(isEven);            
             Assert.AreEqual(true, decoreated(2));
             Assert.AreEqual(false, decoreated(3));
+        }
+
+        [Test]
+        public void Test()
+        {
+            int i = 0;
+            Func<int, bool> fun = q =>
+            {
+                i++;
+                return true;
+            };
+
+            Assert.AreEqual(true, fun(3));
+            Assert.AreEqual(1, i);
+            Assert.AreEqual(true, fun(3));
+            Assert.AreEqual(2, i);
+            Assert.AreEqual(true, fun(3));
+            Assert.AreEqual(3, i);
+
+            i = 0;
+            var decorated = (new RunOnceHelper()).WrapRunOnceUnsafe(fun);
+            Assert.AreEqual(true, decorated(3));
+            Assert.AreEqual(1, i);
+            Assert.AreEqual(false, decorated(3));
+            Assert.AreEqual(1, i);
+            Assert.AreEqual(false, decorated(3));
+            Assert.AreEqual(1, i);
         }
     }
 }
