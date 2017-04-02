@@ -8,7 +8,9 @@ namespace Stuff
     public class RunOnceDelegateDecorator
     {
         private readonly AutoResetEvent _syncObj = new AutoResetEvent(true);
+#pragma warning disable 169, 414
         private volatile bool _runBefore = false;
+#pragma warning restore 169, 414
 
         /// <summary> Simple decoration of given delegate. Does not introduce any additional behavior </summary>
         /// <typeparam name="T"> Delegate type</typeparam>
