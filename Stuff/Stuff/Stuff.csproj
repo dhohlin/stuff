@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CachingGenerator.cs" />
+    <Compile Include="CoalescingExtensions.cs" />
     <Compile Include="DelegateExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RunOnceDelegateDecorator.cs" />
