@@ -1,7 +1,9 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Stuff
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class DelegateExtensions
     {
         public static Action AsRunOnce(this Action act)

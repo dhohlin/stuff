@@ -21,8 +21,8 @@ namespace Stuff
             return new State
             {
                 IsCachingGenerator = cachingGenerator != null,
-                EnumeratorCreated = cachingGenerator?.origEnumerator != null,
-                CacheSize = cachingGenerator?.cache.Keys.Count ?? 0
+                EnumeratorCreated = cachingGenerator?.OrigEnumerator != null,
+                CacheSize = cachingGenerator?.Cache.Keys.Count ?? 0
             };
         }
 
@@ -33,64 +33,57 @@ namespace Stuff
             public int CacheSize { get; internal set; }
         }
 
-
         private class CachingGeneratorImpl<T> : IEnumerable<T>
         {
-            internal readonly ConcurrentDictionary<int, T> cache = new ConcurrentDictionary<int, T>();
-            private readonly IEnumerable<T> origGenerator;
-            internal IEnumerator<T> origEnumerator;
+            internal readonly ConcurrentDictionary<int, T> Cache = new ConcurrentDictionary<int, T>();
+            private readonly IEnumerable<T> _origGenerator;
+            internal IEnumerator<T> OrigEnumerator;
 
             internal CachingGeneratorImpl(IEnumerable<T> decoratee)
             {
-                origGenerator = decoratee;
+                _origGenerator = decoratee;
             }
 
-            public IEnumerator<T> GetEnumerator()
-            {
-                return new CachingEnumerator(this);
-            }
+            public IEnumerator<T> GetEnumerator() => new CachingEnumerator(this);
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-            private bool tryMoveToIndex(int index)
+            private bool TryMoveToIndex(int index)
             {
-                if (cache.ContainsKey(index))
+                if (Cache.ContainsKey(index))
                     return true;
 
-                if (origEnumerator == null)
-                    origEnumerator = origGenerator.GetEnumerator();
-                if (!origEnumerator.MoveNext())
+                if (OrigEnumerator == null)
+                    OrigEnumerator = _origGenerator.GetEnumerator();
+                if (!OrigEnumerator.MoveNext())
                     return false;
 
-                if (!cache.TryAdd(index, origEnumerator.Current))
+                if (!Cache.TryAdd(index, OrigEnumerator.Current))
                     throw new InvalidOperationException("Unable to add item to cache");
 
                 return true;
             }
 
-            private T getValueAtIndex(int index)
+            private T GetValueAtIndex(int index)
             {
                 T result;
-                if (!cache.TryGetValue(index, out result))
+                if (!Cache.TryGetValue(index, out result))
                     throw new InvalidOperationException("Cache slot is empty");
                 return result;
             }
 
             private class CachingEnumerator : IEnumerator<T>
             {
-                private readonly CachingGeneratorImpl<T> parent;
-                private int index;
+                private readonly CachingGeneratorImpl<T> _parent;
+                private int _index;
 
                 internal CachingEnumerator(CachingGeneratorImpl<T> parent)
                 {
-                    this.parent = parent;
-                    index = -1;
+                    _parent = parent;
+                    _index = -1;
                 }
 
-                public T Current => parent.getValueAtIndex(index);
+                public T Current => _parent.GetValueAtIndex(_index);
 
                 object IEnumerator.Current => Current;
 
@@ -100,13 +93,13 @@ namespace Stuff
 
                 public bool MoveNext()
                 {
-                    index++;
-                    return parent.tryMoveToIndex(index);
+                    _index++;
+                    return _parent.TryMoveToIndex(_index);
                 }
 
                 public void Reset()
                 {
-                    index = -1;
+                    _index = -1;
                 }
             }
         }

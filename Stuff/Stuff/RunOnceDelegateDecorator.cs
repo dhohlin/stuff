@@ -27,8 +27,9 @@ namespace Stuff
 
             var parameters = parametersInfo.Select(pi => Expression.Parameter(pi.ParameterType)).ToArray();
             var delegateInstance = del as Delegate;
-
+                
             var ce = Expression.Call(
+                // ReSharper disable once PossibleNullReferenceException
                 Expression.Constant(delegateInstance.Target),
                 delegateInstance.Method,
                 parameters);
@@ -54,6 +55,7 @@ namespace Stuff
             var delegateInstance = del as Delegate;
 
             var ce = Expression.Call(
+                // ReSharper disable once PossibleNullReferenceException
                 Expression.Constant(delegateInstance.Target),
                 delegateInstance.Method,
                 parameters);
@@ -90,6 +92,7 @@ namespace Stuff
             var delegateInstance = del as Delegate;
 
             var callOrignalDelegateExpression = Expression.Call(
+                // ReSharper disable once PossibleNullReferenceException
                 Expression.Constant(delegateInstance.Target),
                 delegateInstance.Method,
                 parameters);
