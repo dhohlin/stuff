@@ -13,6 +13,9 @@ namespace Stuff
 #pragma warning restore 169, 414
 
         /// <summary> Simple decoration of given delegate. Does not introduce any additional behavior </summary>
+        /// <remarks>
+        /// Some remarks here.
+        /// </remarks>
         /// <typeparam name="T"> Delegate type</typeparam>
         /// <param name="del"> Delegate to decorate </param>
         /// <returns> New delegate which is wrapper around given one </returns>
